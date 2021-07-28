@@ -1,0 +1,7 @@
+---
+mysql_root_password: "password"
+app_user: "pratap"
+http_host: "pratap.com"
+http_conf: "pratap.com.conf"
+http_port: "80"
+disable_default: true
