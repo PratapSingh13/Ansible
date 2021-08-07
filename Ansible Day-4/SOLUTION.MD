@@ -128,25 +128,40 @@ Once you’re done updating the variables inside `vars/default.yml` save and clo
 ```yaml
 ---
 - hosts: all
-  become: true
+  become: yes
   vars_files:
     - vars/default.yaml
   tasks:
     - name: "Install prerequisites"
       apt: 
-        name: "{{ item }}" 
+        name: '{{ item }}'
         update_cache: yes 
         state: latest 
         force_apt_get: yes
-      loop: [ 'aptitude' ]
+      loop: 
+        - aptitude
 
   #Apache Configuration
     - name: Install LAMP Packages
       apt: 
-        name: {{ item }} 
+        name: "{{ item }}" 
         update_cache: yes 
         state: latest
-      loop: [ 'apache2', 'mysql-server', 'python3-pymysql', 'php', 'php-mysql', 'libapache2-mod-php' ]
+      loop:
+        - apache2 
+        - mysql-server 
+        - python3-pymysql 
+        - php 
+        - php-mysql 
+        - libapache2-mod-php
+        - python3-pip
+        - python3-mysqldb
+
+    - name: Install pyMySQL
+      pip:
+        name: pymysql
+        state: present
+      ignore_errors: True
 
     - name: Create document root
       file:
@@ -176,7 +191,16 @@ Once you’re done updating the variables inside `vars/default.yml` save and clo
         name: root
         password: "{{ mysql_root_password }}"
         login_unix_socket: /var/run/mysqld/mysqld.sock
-
+      ignore_errors: True
+    
+    - name: Set root user password
+      mysql_user:
+         name: root
+         password: "{{ mysql_root_password }}"
+         check_implicit_admin: yes
+         login_user: admin
+         login_password: "{{ mysql_root_password }}"
+         state: present
     - name: Removes all anonymous user accounts
       mysql_user:
         name: ''
